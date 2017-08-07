@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8" />
+		<meta name="renderer" content="webkit"/>
+
+		<script type="text/javascript" src="js/cn.tee3.avd-2.5.0.0.min.js?20170330365622"></script>
+		
+		<style>		
+				.am-panel {
+					margin-bottom: 20px;
+					background-color: #fff;
+					border: 1px solid transparent;
+					border-radius: 0;
+					-webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, .05);
+					box-shadow: 0 1px 1px rgba(0, 0, 0, .05)
+				}
+				.am-panel-hd {
+					padding: .6rem 1.25rem;
+					border-bottom: 1px solid transparent;
+					border-top-right-radius: 0;
+					border-top-left-radius: 0;
+					color: #444;
+					background-color: #f5f5f5;
+					border-color: #ddd
+				}
+				.am-panel-bd {
+					padding: 1.25rem
+				}
+				.joinMeeting span{
+					display: inline-block;
+					width: 150px;
+					line-height: 30px;
+				}
+				.userListBox{
+					width: 20%;
+					height: 100%;
+					box-sizing: border-box;
+					padding: 15px;
+					float: left;
+					text-align: center;
+					overflow-y: auto;
+					
+				}
+				.userListBox ul{
+					padding: 0px;
+					margin: 0px;
+					list-style: none;
+				}
+				.userListBox ul li{
+					text-align: center;
+					line-height: 40px;
+					cursor: pointer;
+				}
+				.userListBox ul li.current{
+					background: darkolivegreen;
+					color: #fff;;
+				}
+				.contentBox{
+					width: 80%;
+					height: 100%;
+					overflow-y: auto;
+					float: left;
+				}
+				td{
+					text-align:center;
+					line-height: 25px;
+				}
+				.remoteMediaItem{
+					width: 400px; 
+					height: 280px; 
+					border: 1px solid #ccc; 
+					margin: auto;
+					margin-top: 10px;
+				}
+				.remoteMediaItem p{
+					text-align: center;
+				}
+				.contentBox{
+					width: 80%;
+					height: 100%;
+					float: left;
+				}
+				.contentItem{
+					width: 50%; 
+					height: 50%; 
+					float: left; 
+					box-sizing: border-box; 
+					text-align: center;
+				}
+				.contentItem input{
+					display: inline-block;
+					width: 369px;
+					line-height: 30px;
+					margin: 10px 0px;
+				}
+		</style>
+		
+	    <title>SDK Guide</title>
+	</head>
+
+	<body>
+		<div id="webContainerStatusDiv"></div>
+	   
+		<!--<div id="browserDetectDiv"></div>-->	
+		<div style="text-align: center;" id="detectDiv">
+			 浏览器信息
+			<br>
+			<br>
+	    	<input type="button" value="开始检测" id="browserCheckButton" onclick="CheckBrowserDetect();" />
+	    	<br>
+	    	<br>
+			<table id="browserDetectTable" align="center" style="border: 1px solid black;">
+			</table>
+		</div>
+        <HR>
+        
+        <div style="text-align: center;">
+        	检查设备
+        	<br>
+        	<br>
+	    	<input type="button" value="开始检测" id="equipmentCheckButton"  onclick="checkDevice();" />
+		    <br>
+			<br>
+		    <table style="border: 1px solid black;display: none;" align="center" id="checkInfoTable">
+				<thead>
+					<td><b>视频检查</b></td>
+					<td><b>音频检查</b></td>
+				</thead>
+				<tbody>
+					<tr>
+						<td id="hasVideo">有视频：true</td>
+						<td id="hasAudio">有音频：true</td>
+					</tr>
+					<tr>
+						<td>视频列表：
+							<select id="videoList" onchange="changeVideo()"></select>
+						</td>
+						<td>音频列表：
+							<select id="audioList" onchange="changeAudio()"></select>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<video id="checkVideo" autoplay style="width: 300px; height: 200px;"></video>
+						</td>
+						<td>
+							<audio id="checkAudio" autoplay></audio>
+							<span id="audioLevel"></span>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+        </div>
+       	
+        <HR>
+        <div style="text-align: center;">
+         	获取访问令牌及创建会议 
+         	<br>
+         	<br>
+         	<div id='done1' ><a href="#" onclick="document.getElementById('tokenAndRoomDiv').style.display = 'block';document.getElementById('done1').style.display = 'none';document.getElementById('done2').style.display = 'block';" title="展开操作">展开操作</a></div>
+			<div id='done2' style="display: none;"><a href="#" onclick="document.getElementById('tokenAndRoomDiv').style.display = 'none';document.getElementById('done2').style.display = 'none';document.getElementById('done1').style.display = 'block';"  title="隐藏操作">隐藏操作</a></div>
+			<br>
+			<div id="tokenAndRoomDiv" style="display: none;">
+			<p style="color: orange; margin: 0; padding: 0;">***注：该实现只在demo中使用，因令牌安全问题，生产环境中该逻辑需要在服务器端实现；</p>
+        
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;
+		    access_key:<input type="text" placeholder="请输入access_key"  value="demo_access"  id="accessKey" name="accessKey" />&nbsp;&nbsp;
+		    secret_key:<input type="text" placeholder="请输入demo_secret" value="demo_secret"  id="secretKey" name="secretKey" />&nbsp;&nbsp;
+		    <input type="button" value="获取访问令牌"   onclick="getAccessToken();" />
+		   
+		    <br><br>&nbsp;&nbsp;&nbsp;&nbsp;
+		           会议主题:<input type="text" placeholder="请输入会议主题"  value="testingMeeting"  id="topic" name="topic" />&nbsp;&nbsp;
+		           最大视频数:<input type="text" placeholder="请输入允许的最大视频数"  value="5"  id="maxVideo" name="maxVideo" style="width:25px;"/>&nbsp;&nbsp;
+		           最大音频数:<input type="text" placeholder="请输入允许的最大音频数"  value="5"  id="maxAudio" name="maxAudio" style="width:25px;"/>&nbsp;&nbsp;
+		           主持人密码:<input type="text" placeholder="请输入主持人密码"    value="123456"  id="hostPassword" name="hostPassword" style="width:50px;"/>&nbsp;&nbsp;
+		           会议类型:
+		    <input id="roomMode" name="roomMode" type="radio" value="1" checked="checked"/>MCU 
+            <input id="roomMode" name="roomMode" type="radio" value="3"/>P2P
+           
+            &nbsp;&nbsp;
+		    <input type="button" value="创建会议"   onclick="createRoom();" />
+		    <br>
+		    <br>
+	        	<div id="tokenAndRoomErrorDiv" style="color: red;"></div>
+	    	<br>
+		   </div>
+		   
+	    	
+        </div>
+       
+		
+		<HR>
+        <div style="text-align: center;">
+	       	 加入会议
+	        <br>
+			<br>
+			<div style="text-align: left; width: 500px; margin: auto;" class="joinMeeting">
+				<span>服务器地址:</span><input type="text" placeholder="请输入服务器IP及端口" value="192.168.1.200"  id="serverURI" name="serverURI" />
+				<br />
+				<span>访问令牌:</span><input type="text" placeholder="请输入访问令牌"   id="accessToken" name="accessToken" value=""/>
+				<br>
+				<label for='videoCodingSelect'><span>视频编码格式： </span></label>
+				<select id='videoCodingSelect'></select>
+				<br>
+				<span>会议号:</span><input type="text" placeholder="请输入会议号" id="room_id" name="room_id" value=""/><br>
+				<span>用户Id:</span><input type="text" placeholder="请输入用户Id" id="user_id" name="user_id"  value=""/><br>
+				<span>用户名:</span><input type="text" placeholder="请输入用户名" id="user_name" name="user_name"  value=""/><br>
+				<span>用户扩展数据:</span><input type="text" placeholder="请输入用户扩展数据" id="user_data" name="user_data" /><br>
+				<span>主持人或会议的密码:</span><input type="text" placeholder="请输入主持人或会议的密码" id="password" name="password" /><br><br>
+				<input type="button" id="joinButton"  name="joinButton"  value="加会" onclick="joinRoom();" />
+				<input type="button" id="leaveButton"  name="leaveButton"  value="退会" onclick="leaveRoom();"/>
+		
+				<br>
+			</div>
+			<br>
+			<div id="guideDiv" style="color: red;"></div>
+			<div id="joinSuccessDiv" style="color: green;"></div>
+			<div id="connectionStatuseDiv" style="color: red;"></div>
+			<br>
+		</div>
+		<HR>
+		<br>
+		<div style="text-align: center; min-width: 1165px;">参会者列表:</div>
+		<br>
+		<div>
+			<table border="1" cellspacing="0" cellpadding="0" id="participantDiv" name="participantDiv" width="1165" align="center">
+				<thead>
+					<td width="200px">用户信息<br>nodeId/userId/username</td>
+					<td width="565px">摄像头信息<br>名字/状态/操作</td>
+					<td width="300px">麦克风信息<br>名字/状态/操作</td>
+					<td width="65px">音量值</td>
+					<td width="100px">操作</td>
+				</thead>
+			</table>
+		</div>
+		<br>
+		<br>
+		<div id="mediaDiv" style="border: solid 1px black;width: 1165px; height: 732px; margin: auto; display: none;">
+			<div align="center" style="border-bottom: solid 1px black; line-height: 30px; height: 30px;" id="roomTitle">
+				<div style="width: 50%; float: left; box-sizing: border-box; border-right: 1px solid #ccc;">本地</div>
+				<div style="width: 50%; float: left; box-sizing: border-box;">远端</div>
+			</div>
+			
+			<div style="height: 700px;">
+				<div id='loaclBox' style="width: 50%; height: 700px;float: left; overflow-y: auto;">
+					<div id="localVideoList" style="width: 100%;">
+				
+					</div>
+					<br />
+					<hr />
+					<audio id="localAudio" muted autoplay></audio>
+					<br />
+					<div id="loaclAudioBox">
+						<div class="am-panel" >
+							<div class="am-panel-hd">麦克风设备</div>
+							<div class="am-panel-bd">
+								<label for='initAudioSource'>设备列表: </label>
+								<select id='initAudioSource'></select>
+								&nbsp;&nbsp; &nbsp;&nbsp;
+								<input type="button" value="设置为当前麦克风" onclick="setRecordingMicrophone();" />
+					        </div>
+				      </div>
+						<input type="button" value="打开麦克风" onclick="openMicrophone();" />
+						<input type="button" value="关闭麦克风" onclick="closeMicrophone();" />
+						&nbsp;&nbsp;&nbsp;&nbsp;
+						
+						<input type="button" value="禁音" onclick="muteMicrophone();" />
+						<input type="button" value="取消禁音" onclick="unmuteMicrophone();" />
+						<br />
+						<br />
+						<input type="button" value="屏蔽会议声音" onclick="muteSpeaker();" />
+						<input type="button" value="取消屏蔽会议声音" onclick="unmuteSpeaker();" />
+					</div>
+				</div>
+				<div id="remoteBox" style="width: 50%; height: 700px;float: left; overflow-y: auto;">
+					<div id='remoteMediaList'>
+					</div>
+					
+				</div>
+			</div>
+		</div>
+	
+		<br>
+		<HR>
+		<br />
+		<p align="center">公聊，私聊，透明通道</p>
+		<br />
+		<div id="chatBox" style="border-bottom: solid 1px black;height: 350px; width: 1165px; margin: auto; border: 1px solid #5C5C5C; display: none;">
+			
+			<div class="userListBox">
+				<ul id="chatUserList">
+					<li class="current">所有人</li>
+				</ul>
+			</div>
+			<div style="width: 40%; float: left; box-sizing: border-box; text-align: center;">
+				<div>聊天</div>
+				<table align="center">
+					<tr>
+						<td>
+						     <textarea id="messageColl" name="messageColl" disabled="disabled" type="textarea" cols="50" rows="17" style="resize:none"></textarea>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<input id="message" placeholder="请输入内容" name="message" type="text" onkeydown="if(event.keyCode==13) messageSend()"; style="display: inline-block;width: 369px;line-height: 30px;"></textarea>
+						</td>
+					</tr>
+				</table>
+			</div>
+			
+			<div style="width: 40%; float: left; box-sizing: border-box; text-align: center;">
+				<div>透明通道</div>
+				<table align="center">
+					<tr>
+						<td>
+							  <textarea id="dataColl" name="dataColl" disabled="disabled" type="textarea" cols="50" rows="17" style="resize:none"></textarea>
+					    </td>
+					</tr>
+					<tr>
+						<td>
+							<input id="dataMsg" placeholder="请输入内容" name="dataMsg" type="text" onkeydown="if(event.keyCode==13) dataSend()" style="display: inline-block;width: 369px;line-height: 30px;"></textarea>
+						</td>
+					</tr>
+					
+				</table>
+			</div>
+		</div>
+		<br />
+		<br />
+		<hr />
+		<br />
+		<p align="center">个人、房间、扩展字段操作</p>
+		<br />
+		<div id="extendedInfoBox" style="border-bottom: solid 1px black;height: 430px; width: 1165px; margin: auto; border: 1px solid #5C5C5C; display: none;">
+			
+			<div class="userListBox">
+				<ul id="extendedInfoUserList">
+				
+				</ul>
+			</div>
+			
+			<div class="contentBox">
+				<div class="contentItem">
+					<div>保存用户扩展字段</div>
+					<input type="text" placeholder="请输入用户扩展字段内容，按回车提交" id="userDataMsg" name="userDataMsg"  onkeydown="if(event.keyCode==13)  updateUserData();"/>
+					<textarea id="userDataColl" name="userDataColl" disabled="disabled" type="textarea" cols="50" rows="7" style="resize:none"></textarea>
+							
+				</div>
+				<div class="contentItem">
+					<div>获取用户扩展字段</div>
+					<input type="button" value="获取选中用户扩展字段" onclick="getUserData();" style="width: 373px;height: 36px"/>
+					<textarea id="viewUserData" name="viewUserData" disabled="disabled" type="textarea" cols="50" rows="7" style="resize:none"></textarea>	
+				</div>
+				<div class="contentItem">
+					<div style="margin-top: 10px;">保存房间应用扩展字段</div>
+					<input type="text" placeholder="请输入房间应用扩展字段内容，格式：key:value，按回车提交" id="appDataKV" name="appDataKV" onkeydown="if(event.keyCode==13)  updateAppData();"/>
+					<textarea id="appDataColl" name="appDataColl" disabled="disabled" type="textarea" cols="50" rows="7" style="resize:none"></textarea>
+				</div>
+				<div class="contentItem">
+					<div style="margin-top: 10px;">获取房间应用扩展字段</div>
+					<input type="text" placeholder="输入key值，空表示返回所有key，按回车提交" id="appDataKey" name="appDataKey" onkeydown="if(event.keyCode==13)  getAppData();" />
+					<textarea id="viewAppDataValue" name="viewAppDataValue" disabled="disabled" type="textarea" cols="50" rows="7" style="resize:none"></textarea>
+				</div>
+			</div>
+		</div>
+		<br />
+		<br />
+		<br />
+		<br />
+		<br />
+		<br />
+		<script type="text/javascript" src="js/sha.js"></script>
+		<script type="text/javascript" src="js/restJS.js"></script>
+		<script type="text/javascript" src="js/sdk_guide.js"></script>
+		
+		<script type="text/javascript">
+			 var protocolStr = document.location.protocol;
+			 if(protocolStr != "http:" && protocolStr != "https:"){
+			 	   var output = "<B style='color:red''>出错提示：</B><br>";
+			 	    output += '&nbsp;&nbsp;&nbsp;&nbsp;1)不能在浏览器中文件直接显示，需要部署在web容器(如jboss,nginx,tomcat等)中访问,地址如：http://127.0.0.1:8020/sdk_guide/demo/sdk_guide.html'  + '<br>';
+                    output += '&nbsp;&nbsp;&nbsp;&nbsp;2)操作前请阅读文件夹中的README.md帮助文档'  + '<br><br><HR>';
+                    document.getElementById('webContainerStatusDiv').innerHTML = output;
+            }
+		</script>
+ </body>
+</html>
