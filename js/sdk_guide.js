@@ -389,7 +389,7 @@ function setResolutionSuccess(){
 }
 
 function reJoin(){
-	 //window.location.href="sdk_guide.html";
+	 //window.location.href="index.html";
 	 room.reJoin();
 }
 
@@ -502,7 +502,7 @@ function onLeaveIndication(reason,userId) {
 	 $("#guideDiv").html("你被"+userName+"踢出会议室。被踢原因：" + reason).show();
 	 
 	 setTimeout(function(){
-	     top.location = "sdk_guide.html";
+	     top.location = "index.html";
 	     return false;
 	  },5000);
 }
@@ -560,7 +560,7 @@ function leaveRoom() {
 	if (close) {
 		var reason = 1; //退会原因
 		room.leave(reason).then(function() {
-			top.location = "sdk_guide.html";
+			top.location = "index.html";
 			return false;
 		});
 	}
